@@ -16,9 +16,9 @@ public class ProfileService {
 
     public ProfileDto createProfile(ProfileDto profileDto) {
 
-//        if (profileRepository.existsByClerkId(profileDto.getClerkId())) {
-//            throw new RuntimeException("Profile already exists for clerkId: " + profileDto.getClerkId());
-//        }
+        if (profileRepository.existsByClerkId(profileDto.getClerkId())) {
+            throw new RuntimeException("Profile already exists for clerkId: " + profileDto.getClerkId());
+        }
 
         ProfileDocument profile = ProfileDocument.builder()
                 .clerkId(profileDto.getClerkId())
@@ -46,4 +46,7 @@ public class ProfileService {
     }
 
 
+    public boolean existsByClerkId(String clerkId) {
+        return profileRepository.existsByClerkId(clerkId);
+    }
 }
