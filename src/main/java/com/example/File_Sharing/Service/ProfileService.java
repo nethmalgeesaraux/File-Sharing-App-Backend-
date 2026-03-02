@@ -52,4 +52,33 @@ public class ProfileService {
     public boolean existsByClerkId(String clerkId) {
         return profileRepository.existsByClerkId(clerkId);
     }
+
+    public ProfileDto updateProfile(ProfileDto profileDto){
+        ProfileDocument existingProfile = profileRepository.findByClerkId(profileDto.getClerkId());
+        if (existingProfile == null) {
+            throw new RuntimeException("Profile not found for clerkId: " + profileDto.getClerkId());
+        }
+
+        existingProfile.setEmail(profileDto.getEmail());
+        existingProfile.setFirstname(profileDto.getFirstname());
+        existingProfile.setLastName(profileDto.getLastName());
+        existingProfile.setPhotoUrl(profileDto.getPhotoUrl());
+
+        try {
+            existingProfile = profileRepository.save(existingProfile);
+        }catch (DuplicateKeyException e) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        return ProfileDto.builder()
+                .id(existingProfile.getId())
+                .clerkId(existingProfile.getClerkId())
+                .email(existingProfile.getEmail())
+                .firstname(existingProfile.getFirstname())
+                .lastName(existingProfile.getLastName())
+                .photoUrl(existingProfile.getPhotoUrl())
+                .credits(existingProfile.getCredits())
+                .createdAt(existingProfile.getCreatedAt())
+                .build();
+    }
 }
