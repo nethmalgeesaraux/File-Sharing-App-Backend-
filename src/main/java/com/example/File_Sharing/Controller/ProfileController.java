@@ -18,8 +18,8 @@ public class ProfileController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerProfile(@RequestBody ProfileDto profileDto){
-        ProfileDto savedProfile = profileService.createProfile(profileDto);
         HttpStatus status = profileService.existsByClerkId(profileDto.getClerkId()) ? HttpStatus.OK : HttpStatus.CREATED;
+        ProfileDto savedProfile = profileService.createProfile(profileDto);
         return ResponseEntity.status(status).body(savedProfile);
     }
 }
