@@ -16,6 +16,12 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+// Imports for JJWT signing key resolver
+import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.SigningKeyResolverAdapter;
+import io.jsonwebtoken.io.Decoders;
+
 @Component
 public class ClerkJwksProvider {
 
@@ -104,6 +110,23 @@ public class ClerkJwksProvider {
         RSAPublicKeySpec spec = new RSAPublicKeySpec(modulusBigInt, exponentBigInt);
         KeyFactory factory = KeyFactory.getInstance("RSA");
         return factory.generatePublic(spec);
+    }
+
+    // Provide a SigningKeyResolver that locates the public key by 'kid' in the JWKS
+    public SigningKeyResolver getSigningKeyResolver() {
+        return new SigningKeyResolverAdapter() {
+            @Override
+            public java.security.Key resolveSigningKey(io.jsonwebtoken.JwsHeader header, io.jsonwebtoken.Claims claims) {
+                try {
+                    String kid = (String) header.getKeyId();
+                    if (kid == null) return null;
+                    return getPublicKey(kid);
+                } catch (Exception e) {
+                    logger.warn("Unable to resolve signing key for kid: {}", header.getKeyId(), e);
+                    return null;
+                }
+            }
+        };
     }
 
 }
