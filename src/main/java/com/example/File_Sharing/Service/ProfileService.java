@@ -3,6 +3,7 @@ package com.example.File_Sharing.Service;
 import com.example.File_Sharing.Documents.ProfileDocument;
 import com.example.File_Sharing.Dto.ProfileDto;
 import com.example.File_Sharing.Repository.ProfileRepository;
+import com.mongodb.DuplicateKeyException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +17,6 @@ public class ProfileService {
 
     public ProfileDto createProfile(ProfileDto profileDto) {
 
-        if (profileRepository.existsByClerkId(profileDto.getClerkId())) {
-            throw new RuntimeException("Profile already exists for clerkId: " + profileDto.getClerkId());
-        }
-
         ProfileDocument profile = ProfileDocument.builder()
                 .clerkId(profileDto.getClerkId())
                 .email(profileDto.getEmail())
@@ -30,7 +27,13 @@ public class ProfileService {
                 .createdAt(Instant.now())
                 .build();
 
-        profile = profileRepository.save(profile);
+
+        try {
+            profile = profileRepository.save(profile);
+        }catch (DuplicateKeyException e) {
+            throw new RuntimeException("Email already exists");
+        }
+
 
         return ProfileDto.builder()
                 .id(profile.getId())
